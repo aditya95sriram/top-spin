@@ -2,7 +2,7 @@ var cnv;
 
 let coins = [];
 let settings = {};
-settings.rotated_tiles = true;
+settings.rotated_coins = true;
 settings.switch_size = 4;
 settings.size = 20;
 
@@ -52,6 +52,8 @@ function init() {
   coins = [];
   for (var i=0; i<settings.size; i++) coins.push(new Coin(i+1));
   windowResized();
+  select("#size-disp").html(settings.size);
+  select("#window-disp").html(settings.switch_size);
 }
 
 function getcoin(n) {
@@ -66,21 +68,31 @@ function preload() {
 
 function setup() {
   //createCanvas(1300, 640);
-  cnv = createCanvas(windowWidth, windowHeight);
-  cnv.position(0,0);
+  cnv = createCanvas(100, 100);
+  cnv.parent("sketch");
+  windowResized();
+  //cnv.position(0,0);
   background(bg);
   if (font != undefined) textFont(font);
   textAlign(CENTER, CENTER);
   textSize(coin_rad-15);
   init();
-  console.log(width, height);
   translate(width/2, height/2);
+  let btn = select("#btn-rotation");
+  btn.mouseClicked(function(){
+    if (settings.rotated_coins)
+      btn.removeClass("button--tertiary");
+    else
+      btn.addClass("button--tertiary");
+    settings.rotated_coins = !settings.rotated_coins;
+  });
 }
 
 function windowResized() {
-  cnv.resize(windowWidth, windowHeight);
+  let parent = select("#sketch");
+  let w = parent.width - parseInt(parent.style("padding-left")) - parseInt(parent.style("padding-right"));
+  cnv.resize(w, windowHeight);
   track_rad = coin_total/(2*sin(HALF_PI/(settings.size/2-settings.switch_size-1)));
-  console.log(track_rad,windowHeight,(windowHeight-settings.switch_size*coin_total/2)/2.4);
   if ((windowHeight - (settings.switch_size+1)*coin_total/2) < 2.4*track_rad) {
     track_rad = parseInt((windowHeight - (settings.switch_size+1)*coin_total/2)/2.4);
   }
@@ -95,7 +107,7 @@ function draw_coin(idx, cx, cy, col) {
   coin = getcoin(idx);
   push();
   translate(cx, cy);
-  if (settings.rotated_tiles) rotate(coin.rot);
+  if (settings.rotated_coins) rotate(coin.rot);
   fill(coin_back);
   ellipse(0, 0, coin_rad+coin_pad);
   fill(coin_front);
@@ -281,7 +293,7 @@ function draw() {
   if (!running) return;
   if (!anim_switch && !anim_slide) check_actions();
   background(bg);
-  translate(width/2, 1.2*track_rad+settings.switch_size*coin_total/2);
+  translate(width/2, 1.1*track_rad+settings.switch_size*coin_total/2);
   if (anim_switch) {
     if (anim_theta >= PI) {
       anim_switch = false;
@@ -321,11 +333,13 @@ function keyReleased() {
   else if (key == "s") {
     scramble();
   } else if (key == "r") {
-    action_queue = ["reset"];
+    reset();
   }
 }
 
-function mousePressed() {running = !running;}
+function reset() {
+  action_queue = ["reset"];
+}
 
 function scramble() {
   action_queue = [];

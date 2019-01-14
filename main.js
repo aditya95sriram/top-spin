@@ -34,6 +34,7 @@ settings.scramble_switch_rate = 0.3;
 // colors
 const coin_front = '#fccc01';
 const coin_back = '#c9a200';
+const coin_back_correct = '#76b22c';
 const bg = 255;
 const track = 25;
 
@@ -45,6 +46,7 @@ function mod(n, m) {
 function Coin(i) {
   this.val = i;
   this.rot = noise(i)*TWO_PI;
+  this.correct = false;
   return this;
 }
 
@@ -54,6 +56,7 @@ function init() {
   windowResized();
   select("#size-disp").html(settings.size);
   select("#window-disp").html(settings.switch_size);
+  check_correct();
 }
 
 function getcoin(n) {
@@ -108,7 +111,7 @@ function draw_coin(idx, cx, cy, col) {
   push();
   translate(cx, cy);
   if (settings.rotated_coins) rotate(coin.rot);
-  fill(coin_back);
+  fill(coin.correct ? coin_back_correct : coin_back);
   ellipse(0, 0, coin_rad+coin_pad);
   fill(coin_front);
   ellipse(0, 0, coin_rad);
@@ -238,7 +241,27 @@ function draw_coins() {
     draw_coin(coin_ctr++, v.x, v.y);
   }
   pop();
+}
 
+function check_correct() {
+  let pos;
+  for (let i=0; i<settings.size; i+=1) {
+    coins[i].correct = false;
+    if (coins[i].val == 1) {
+      coins[i].correct = true;
+      pos = i;
+    }
+  }
+  let delta = 0
+  while (delta <= settings.size) {
+    if (getcoin(pos+delta+1).val == getcoin(pos+delta).val+1) {
+      getcoin(pos+delta+1).correct = getcoin(pos+delta).correct;
+    }
+    if (getcoin(pos-delta-1).val == getcoin(pos-delta).val+1) {
+      getcoin(pos-delta-1).correct = getcoin(pos-delta).correct;
+    }
+    delta += 1;
+  }
 }
 
 
@@ -302,6 +325,7 @@ function draw() {
       coins = y.concat(coins);
       adjust_rotation('switch');
       switch_parity = -switch_parity;
+      check_correct();
     } else {
       anim_theta += settings.switch_rate;
     }

@@ -321,7 +321,7 @@ function draw() {
     if (anim_theta >= PI) {
       anim_switch = false;
       anim_theta = 0;
-      y = coins.splice(0, settings.switch_size).reverse();
+      let y = coins.splice(0, settings.switch_size).reverse();
       coins = y.concat(coins);
       adjust_rotation('switch');
       switch_parity = -switch_parity;
@@ -356,6 +356,7 @@ function keyReleased() {
   else if (key == " ") action_queue.push("switch");
   else if (key == "s") scramble();
   else if (key == "r") reset();
+  else if (key == "q") quick_scramble();
   else if (key == "d") {
     settings.default_slide_rate += 0.01;
     settings.default_switch_rate += 0.01;
@@ -385,4 +386,20 @@ function scramble() {
     action_queue.push(action);
   }
   action_queue.push("end-scramble");
+}
+
+function quick_scramble() {
+  scramble();
+  action_queue.shift(); // begin-scramble;
+  while (action_queue.length > 0) {
+    action = action_queue.shift();
+    if (action == "end-scramble") break;
+    else if (action == "left") coins.push(coins.shift());
+    else if (action == "right") coins.unshift(coins.pop());
+    else if (action == "switch") {
+      let y = coins.splice(0, settings.switch_size).reverse();
+      coins = y.concat(coins);
+    } else console.log("invalid action", action);
+  }
+  check_correct();
 }

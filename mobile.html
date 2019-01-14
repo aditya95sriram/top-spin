@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Oval Track Puzzle</title>
+  <link href="tent.min.css" rel="stylesheet">
+  <script src="p5.min.js"></script>
+  <script src="p5.dom.min.js"></script>
+  <script src="hammer.min.js"></script>
+  <script src="main.js"></script>
+  <style type="text/css">
+  #settings .counter a.button {
+    font-size: 1.5em;
+    padding: 0;
+  }
+  #btn-scramble::first-letter,#btn-reset::first-letter {
+    text-decoration: underline;
+  }
+  #title, #settings .title {
+    margin-bottom: 5px;
+  }
+  </style>
+</head>
+<body style="overflow:hidden">
+  <div class="grid">
+    <div class="grid__column grid__column--9">
+      <h3 class="title title--xl type-center" id="title">Top Spin</h3>
+      <div id="sketch"></div>
+    </div>
+    <div id="settings" class="grid__column grid__column--3 padding-xs">
+      <a href="#" id="btn-reset" class="button button--outlined button--md button--block padding-y" onclick="reset();">Reset</a>
+      <a href="#" id="btn-scramble" class="button button--outlined button--md button--block padding-y" onclick="scramble();">Scramble</a>
+      <a href="#" id="btn-rotation" class="button button--md button--filled button--block button--tertiary padding-y">Rotated Coins</a>
+      <h4 class="title title--lg type-center">Size</h4>
+      <div class="grid counter">
+        <div class="grid__column--3">
+          <a href="#" class="button button--filled button--block" onclick="settings.size -= 2;init();">-</a>
+        </div>
+        <div class="grid__column--6">
+          <a href="#" id="size-disp" class="button button--clear button--block"></a>
+        </div>
+        <div class="grid__column--3">
+          <a href="#" class="button button--filled button--block" onclick="settings.size += 2;init();">+</a>
+        </div>
+      </div>
+      <h4 class="title title--sm title--#--xxl type-center">Window</h4>
+      <div class="grid counter">
+        <div class="grid__column--3">
+          <a href="#" class="button button--filled button--block" onclick="settings.switch_size -= 1;init();">-</a>
+        </div>
+        <div class="grid__column--6">
+          <a href="#" id="window-disp" class="button button--clear button--block"></a>
+        </div>
+        <div class="grid__column--3">
+          <a href="#" class="button button--filled button--block" onclick="settings.switch_size += 1;init();">+</a>
+        </div>
+      </div>
+    </div>
+</div>
+  <!-- <div id="sketch" style="width:80%; height:100%; display:block"></div> -->
+  <!-- style="width:100%; height:100%" -->
+</body>
+</html>

@@ -28,8 +28,8 @@ settings.slide_rate = 0.07;
 settings.switch_rate = 0.25;
 settings.default_slide_rate = 0.07;
 settings.default_switch_rate = 0.25;
-settings.scramble_slide_rate = 0.15;
-settings.scramble_switch_rate = 0.3;
+settings.scramble_slide_rate = 0.2;
+settings.scramble_switch_rate = 0.35;
 
 // colors
 const coin_front = '#fccc01';
@@ -245,7 +245,7 @@ function draw_coins() {
 
 function check_correct() {
   let pos;
-  for (let i=0; i<settings.size; i+=1) {
+  for (let i=0; i<settings.size; i++) {
     coins[i].correct = false;
     if (coins[i].val == 1) {
       coins[i].correct = true;
@@ -354,10 +354,14 @@ function keyReleased() {
   if (keyCode === RIGHT_ARROW) action_queue.push("right");
   else if (keyCode === LEFT_ARROW) action_queue.push("left");
   else if (key == " ") action_queue.push("switch");
-  else if (key == "s") {
-    scramble();
-  } else if (key == "r") {
-    reset();
+  else if (key == "s") scramble();
+  else if (key == "r") reset();
+  else if (key == "d") {
+    settings.default_slide_rate += 0.01;
+    settings.default_switch_rate += 0.01;
+    settings.switch_rate = settings.default_switch_rate;
+    settings.slide_rate = settings.default_slide_rate;
+    console.log(settings.default_slide_rate, settings.default_switch_rate);
   }
 }
 
@@ -369,11 +373,11 @@ function scramble() {
   action_queue = [];
   let action, i;
   action_queue.push("begin-scramble");
-  for (i=0; i<2.5*settings.size; i++) {
+  for (i=0; i<2*settings.size; i+=(action=="switch")) {
     if (action == "right")
-      action = random(["right", "switch"]);
+      action = random(["right", "switch", "switch"]);
     else if (action == "left")
-      action = random(["left", "switch"]);
+      action = random(["left", "switch", "switch"]);
     else if (action == "switch")
       action = random(["right", "left"]);
     else

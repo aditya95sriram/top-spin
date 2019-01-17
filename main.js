@@ -24,10 +24,10 @@ let anim_slide = false;
 let anim_slide_dir = 0;
 let anim_delta = 0;
 let anim_theta = 0;
-settings.slide_rate = 0.07;
-settings.switch_rate = 0.25;
-settings.default_slide_rate = 0.07;
-settings.default_switch_rate = 0.25;
+settings.slide_rate = 0.1;
+settings.switch_rate = 0.3;
+settings.default_slide_rate = 0.1;
+settings.default_switch_rate = 0.3;
 settings.scramble_slide_rate = 0.2;
 settings.scramble_switch_rate = 0.35;
 
@@ -40,6 +40,9 @@ const track = 25;
 
 // mobile
 let ismobile = false;
+let fsEnabled = false;
+let fullscreen_mode = false;
+let fsenter_icon, fsexit_icon;
 
 function mod(n, m) {
   return ((n % m) + m) % m;
@@ -80,6 +83,12 @@ function preload() {
 function setup() {
   //createCanvas(1300, 640);
   ismobile = mobilecheck();
+  if (ismobile) {
+    fsEnabled = document.fullscreenEnabled || document.webkitFullscreenEnabled ||
+                document.mozFullScreenEnabled || document.msFullscreenEnabled;
+    fsenter_icon = loadImage('images/enter-fullscreen.png');
+    fsexit_icon = loadImage('images/exit-fullscreen.png');
+  }
   cnv = createCanvas(100, 100);
   cnv.parent("sketch");
   windowResized();
@@ -116,14 +125,17 @@ function swiped(event) {
     action_queue.push("right");
   } else if (event.direction == 2) {
     action_queue.push("left");
-  } else if (event.direction == 8 || event.direction == 16) {
-    action_queue.push("switch");
-  }
+  }/* else if (event.direction == 8) {
+    activateFullscreen();
+  } else if (event.direction == 16) {
+    deactivateFullscreen();
+  }*/
 }
 
 function windowResized() {
   let parent = select("#sketch");
   let w = parent.width - parseInt(parent.style("padding-left")) - parseInt(parent.style("padding-right"));
+  if (fullscreen_mode) w = windowWidth;
   cnv.resize(w, windowHeight);
   track_rad = coin_total/(2*sin(HALF_PI/(settings.size/2-settings.switch_size-1)));
   if ((windowHeight - (settings.switch_size+1)*coin_total/2) < 2.4*track_rad) {
@@ -273,6 +285,11 @@ function draw_coins() {
   pop();
 }
 
+function draw_fullscreen_icon() {
+  let img = fullscreen_mode ? fsexit_icon : fsenter_icon;
+  image(img, 10, 10, 50, 50);
+}
+
 function check_correct() {
   let pos;
   for (let i=0; i<settings.size; i++) {
@@ -347,8 +364,9 @@ function draw() {
   if (!anim_switch && !anim_slide) check_actions();
   background(bg);
   if (ismobile) {
+    draw_fullscreen_icon();
     translate(width/2, height/2);
-    scale(0.7);
+    scale(fullscreen_mode ? 0.8 : 0.7);
   } else {
     translate(width/2, track_rad+settings.switch_size*coin_total/2);
   }
@@ -382,6 +400,16 @@ function draw() {
   }
   draw_tracks();
   draw_coins();
+}
+
+function mouseClicked() {
+  console.log(mouseX, mouseY);
+  if (mouseX <= 50 && mouseY <=50) {
+    if (fullscreen_mode) deactivateFullscreen();
+    else activateFullscreen();
+  } else if (mouseX <= width && mouseY <= height) {
+    action_queue.push("switch");
+  }
 }
 
 function keyReleased() {
@@ -437,4 +465,37 @@ function quick_scramble() {
     } else console.log("invalid action", action);
   }
   check_correct();
+}
+
+function activateFullscreen() {
+  if (!fsEnabled) return;
+  var i = document.getElementById("sketch");
+  // go full-screen
+  if (i.requestFullscreen) {
+  	i.requestFullscreen();
+  } else if (i.webkitRequestFullscreen) {
+  	i.webkitRequestFullscreen();
+  } else if (i.mozRequestFullScreen) {
+  	i.mozRequestFullScreen();
+  } else if (i.msRequestFullscreen) {
+  	i.msRequestFullscreen();
+  }
+  fullscreen_mode = true;
+  windowResized();
+}
+
+function deactivateFullscreen() {
+  if (!fsEnabled) return;
+  // exit full-screen
+  if (document.exitFullscreen) {
+  	document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) {
+  	document.webkitExitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+  	document.mozCancelFullScreen();
+  } else if (document.msExitFullscreen) {
+  	document.msExitFullscreen();
+  }
+  fullscreen_mode = false;
+  windowResized();
 }

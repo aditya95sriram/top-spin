@@ -55,9 +55,25 @@ function Coin(i) {
   return this;
 }
 
-function init() {
+function get_params() {
+  var pairs = window.location.search.slice(1).split('&');
+  var result = {};
+  pairs.forEach(function(pair) {
+      pair = pair.split('=');
+      result[pair[0]] = decodeURIComponent(pair[1] || '');
+  });
+  return JSON.parse(JSON.stringify(result));
+}
+
+function init(check_url=false) {
   coins = [];
-  for (var i=0; i<settings.size; i++) coins.push(new Coin(i+1));
+  if (check_url && window.location.search) {
+    let state = get_params().state.split(",");
+    settings.size = state.length;
+    for (var i of state) coins.push(new Coin(parseInt(i)));
+  } else {
+    for (var i=0; i<settings.size; i++) coins.push(new Coin(i+1));
+  }
   windowResized();
   select("#size-disp").html(settings.size);
   select("#window-disp").html(settings.switch_size);
@@ -97,7 +113,7 @@ function setup() {
   if (font != undefined) textFont(font);
   textAlign(CENTER, CENTER);
   textSize(coin_rad-15);
-  init();
+  init(true);
   if (typeof(Hammer) != "undefined") {
     var hammer = new Hammer(document.body, {preventDefault: true});
     hammer.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
@@ -416,6 +432,7 @@ function keyReleased() {
   //if (anim_switch || anim_slide) return;
   if (keyCode === RIGHT_ARROW) action_queue.push("right");
   else if (keyCode === LEFT_ARROW) action_queue.push("left");
+  else if (keyCode === DOWN_ARROW || keyCode === UP_ARROW) action_queue.push("switch");
   else if (key == " ") action_queue.push("switch");
   else if (key == "s") scramble();
   else if (key == "r") reset();
@@ -498,4 +515,10 @@ function deactivateFullscreen() {
   }
   fullscreen_mode = false;
   windowResized();
+}
+
+function share() {
+  let state = coins.map(x => x.val).join(",");
+  window.history.pushState({}, "Share", "?state="+state);
+  alert("Puzzle state copied to URL. You can now share the URL");
 }
